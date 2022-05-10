@@ -1,0 +1,10 @@
+- hosts: ubuntu
+  become: true
+  tasks:
+    - name: Update packages list
+      apt:
+        update_cache: yes
+
+    - name: Upgrade packages
+      apt:
+        upgrade: safe
