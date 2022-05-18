@@ -1,0 +1,80 @@
+- hosts: proxmox
+  handlers:
+    - name: update grub
+      ansible.builtin.command:
+        cmd: >
+          /usr/sbin/update-grub
+    - name: reboot machine
+      reboot:
+  tasks:
+    - name: Check if iommu is configured in the boot command (1/2)
+      lineinfile:
+        backup: true
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*iommu'
+        state: absent
+      check_mode: true
+      register: grub_cmdline_check
+      changed_when: false
+
+    - name: Insert iommu config if missing (2/2)
+      lineinfile:
+        backrefs: true
+        path: /etc/default/grub
+        regexp: "^(GRUB_CMDLINE_LINUX_DEFAULT=\".*)\"$"
+        line: '\1 intel_iommu=on"'
+      when: grub_cmdline_check.found == 0
+      notify: update grub
+
+    - name: Test vfio module (1/2)
+      shell: grep -c "^vfio$" /etc/modules || true
+      register: test_vfio
+      check_mode: true
+      changed_when: false
+
+    - name: Add vfio module (2/2)
+      lineinfile:
+        dest: /etc/modules
+        line: vfio
+      when: test_vfio.stdout == "0"
+
+    - name: Test vfio_iommu_type1 module (1/2)
+      shell: grep -c "^vfio_iommu_type1$" /etc/modules || true
+      register: test_vfio_iommu_type1
+      check_mode: true
+      changed_when: false
+
+    - name: Add vfio_iommu_type1 module (2/2)
+      lineinfile:
+        dest: /etc/modules
+        line: vfio_iommu_type1
+      when: test_vfio_iommu_type1.stdout == "0"
+
+    - name: Test vfio_pci module (1/2)
+      shell: grep -c "^vfio_pci$" /etc/modules || true
+      register: test_vfio_pci
+      check_mode: true
+      changed_when: false
+
+    - name: Add vfio_pci module (2/2)
+      lineinfile:
+        dest: /etc/modules
+        line: vfio_pci
+      when: test_vfio_pci.stdout == "0"
+
+    - name: Test vfio_virqfd module (1/2)
+      shell: grep -c "^vfio_virqfd$" /etc/modules || true
+      register: test_vfio_virqfd
+      check_mode: true
+      changed_when: false
+
+    - name: Add vfio_virqfd module (2/2)
+      lineinfile:
+        dest: /etc/modules
+        line: vfio_virqfd
+      when: test_vfio_virqfd.stdout == "0"
+
+    - name: Update initramfs if neccessary and reboot
+      shell: update-initramfs -u -k all
+      when: test_vfio.stdout == "0" or test_vfio_iommu_type1.stdout == "0" or test_vfio_pci.stdout == "0" or test_vfio_virqfd.stdout == "0"
+      notify: reboot machine

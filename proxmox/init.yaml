@@ -1,0 +1,24 @@
+- hosts: proxmox
+  tasks:
+    - name: Remove PVE enterprise repository from sources list
+      file:
+        path: /etc/apt/sources.list.d/pve-enterprise.list
+        state: absent
+
+    - name: Add PVE no subscription repository into sources list
+      ansible.builtin.apt_repository:
+        repo: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
+        state: present
+
+    - name: Upgrade all packages. Equivalent of "apt-get upgrade"
+      apt:
+        name: "*"
+        state: latest
+
+    - name: Upgrade current distro. Equivalent of "apt-get dist-upgrade".
+      apt:
+        upgrade: dist
+
+    - name: Remove dependencies that are no longer required
+      apt:
+        autoremove: yes

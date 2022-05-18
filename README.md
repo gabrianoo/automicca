@@ -36,3 +36,27 @@ To execute your first playbook, use the below command, where we provide the play
 ansible-playbook ubuntu/upgrade.yaml -K
 ```
 
+# Going advanced
+
+## Setting up password store
+
+Please make sure that you have a GPG key, if not please generate one.
+```bash
+gpg --full-generate-key
+```
+Once you generate it, or if you already have the key copy the UID to use it in the next step.
+
+Make sure you install [password store](https://www.passwordstore.org/). Then go to your home directory and initialize the password store using the UID (gpg-id) you copied before.
+
+```bash
+cd ${HOME}
+pass init "GPG ID"
+```
+
+## Inserting passwords
+
+Now you can insert passwords in the password store as the below example and remember that you can also add other values not only passwords. Later we will retrive these values from the playbooks later using ansible lookup plugin.
+```bash
+pass insert ci/user     # Insert a user under the ci directory in the password store.
+pass insert ci/password # Insert a password under the ci directory in the password store.
+```

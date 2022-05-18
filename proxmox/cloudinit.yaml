@@ -1,0 +1,69 @@
+- hosts: proxmox
+  tasks:
+    - name: Install pip for python 3
+      apt:
+        name: python3-pip
+    
+    - name: Install proxmoxer
+      pip:
+        name: proxmoxer
+
+    - name: Download ubuntu 22.04 Jammy cloud init image
+      get_url:
+        url: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+        dest: /opt/jammy-server-cloudimg-amd64.img
+
+    - name:  Create empty VM using Cloud-Init
+      community.general.proxmox_kvm:
+        node: adam
+        api_user: "{{ lookup('passwordstore', 'pve/user') }}"
+        api_password: "{{ lookup('passwordstore', 'pve/password') }}"
+        api_host: adam.pve.gability.com
+        ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
+        cipassword: "{{ lookup('passwordstore', 'ci/password') }}"
+        name: ubuntu-cloud-22.04
+        vmid: 8000
+        cores: 2
+        memory: 2048
+        net:
+          net0: 'virtio,bridge=vmbr0'
+        scsihw: virtio-scsi-pci
+        scsi:
+          scsi0: 'fast0:1'
+        ide:
+          ide2: 'fast0:cloudinit'
+        bootdisk: scsi0
+        boot: c
+        vga: serial0
+        ipconfig:
+          ipconfig0: 'ip=dhcp'
+        proxmox_default_behavior: compatibility
+
+    - name: Import init disk
+      shell: 'qm importdisk 8000 /opt/jammy-server-cloudimg-amd64.img fast0'
+      args:
+        creates: '/dev/mapper/fast0-vm--8000--disk--1'
+
+    - name: Attach base image disk
+      ansible.builtin.lineinfile:
+        path: /etc/pve/local/qemu-server/8000.conf
+        regexp: '^scsi0:.*'
+        line: 'scsi0: fast0:vm-8000-disk-1'
+
+    - name: Convert VM to template
+      community.general.proxmox_kvm:
+        node: adam
+        api_user: "{{ lookup('passwordstore', 'pve/user') }}"
+        api_password: "{{ lookup('passwordstore', 'pve/password') }}"
+        api_host: adam.pve.gability.com
+        vmid: 8000
+        name: ubuntu-cloud-22.04
+        scsihw: virtio-scsi-pci
+        ide:
+          ide2: 'fast0:cloudinit'
+        bootdisk: scsi0
+        ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
+        cipassword: "{{ lookup('passwordstore', 'ci/password') }}"
+        proxmox_default_behavior: compatibility
+        template: yes
+        update: yes
