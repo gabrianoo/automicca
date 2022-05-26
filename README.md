@@ -1,3 +1,29 @@
+# Disclamer
+
+This repository is a build-up (a fork) on top of [terraform-proxmox-kubespray](https://github.com/bbichero/terraform-proxmox-kubespray) with restructuring to meet a general day to day needs for automating all infrastructure tasks. The activities can be creating a Kubernetes HA cluster, upgrading hosts, or bootstrapping a whole environment from scratch.
+
+---
+
+# Requirements
+
+## Applications
+
+| Applicaiton | Minimum version |
+| ----------- | --------------- |
+| Git         | 1.8.2.3         |
+| Ansible     | v2.6  |
+| Terraform   | v0.12  |
+| Jinja       | 2.9.6  |
+| Python netaddr | !!  |
+
+## Considtations
+
+1. An up and running proxmox node (or more). Documentation can be found [here](https://www.proxmox.com/en/proxmox-ve/get-started).
+1. Install ansible locally. Documentaion can be found [here](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
+1. Install terraform locally. Documentaion can be found [here](https://learn.hashicorp.com/tutorials/terraform/install-cli).
+1. Internet connection on the client machine to download Kubespray.
+1. Internet connection on the Kubernetes nodes to download the Kubernetes binaries.
+
 # Getting started
 
 Before you do anything, you will need to have Ansible installed on your machine. What is Ansible? [read this](https://www.redhat.com/en/technologies/management/ansible/what-is-ansible).
@@ -35,6 +61,8 @@ To execute your first playbook, use the below command, where we provide the play
 ```bash
 ansible-playbook ubuntu/upgrade.yaml -K
 ```
+
+---
 
 # Going advanced
 
