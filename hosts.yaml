@@ -1,0 +1,6 @@
+all:
+  children:
+    proxmox:
+      hosts:
+        adam.pve.gability.com:
+          ansible_user: root

@@ -1,0 +1,28 @@
+- hosts: proxmox
+  tasks:
+    - name: Check if the role already exisys or no (1/2)
+      shell: pveum role list | grep -c "Terraform" || true
+      register: test_role_exists
+      changed_when: false
+
+    - name: Create new proxmox role for our terraform user if it is missing (2/2)
+      shell: pveum role add Terraform -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit"
+      when: test_role_exists.stdout == "0"
+
+    - name: Check if the user already exisys or no (1/2)
+      shell: pveum user list | grep -c "{{ lookup('passwordstore', 'terraform/user') }}" || true
+      register: test_user_exists
+      changed_when: false
+
+    - name: Create a new proxmox user if it is missing (2/2)
+      shell: pveum useradd {{ lookup('passwordstore', 'terraform/user') }} -password {{ lookup('passwordstore', 'terraform/password') }}
+      when: test_user_exists.stdout == "0"
+
+    - name: Check if the role already assigned to the terraform user (1/2)
+      shell: pveum acl list| grep -c "Terraform" || true
+      register: test_acl_exists
+      changed_when: false
+
+    - name: Assign the terraform role to the terraform user if it is missing (2/2)
+      shell: pveum aclmod / --user {{ lookup('passwordstore', 'terraform/user') }} --role Terraform
+      when: test_acl_exists.stdout == "0"
