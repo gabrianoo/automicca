@@ -9,13 +9,6 @@
       changed_when: false
       environment: {}
 
-    - name: install python
-      raw:
-        apt-get update -q && \
-        DEBIAN_FRONTEND=noninteractive apt-get install -q -y python
-      environment: {}
-      when: '"Ubuntu" in os_release.stdout'
-
     - name: configure selinux
       raw:
         yum -q -y install policycoreutils-python && \
@@ -35,7 +28,7 @@
 
     - name: configure keepalived master
       copy:
-        src: ../../config/keepalived-master.cfg
+        src: ../kubernetes/config/keepalived-master.cfg
         dest: /etc/keepalived/keepalived.conf
         owner: root
         group: root
@@ -45,7 +38,7 @@
 
     - name: configure keepalived slave
       copy:
-        src: ../../config/keepalived-slave.cfg
+        src: ../kubernetes/config/keepalived-slave.cfg
         dest: /etc/keepalived/keepalived.conf
         owner: root
         group: root
@@ -61,7 +54,7 @@
 
     - name: configure haproxy
       copy:
-        src: ../../config/haproxy.cfg
+        src: ../kubernetes/config/haproxy.cfg
         dest: /etc/haproxy/haproxy.cfg
         owner: root
         group: root
