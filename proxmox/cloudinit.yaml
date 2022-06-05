@@ -2,8 +2,11 @@
   tasks:
     - name: Install pip for python 3
       apt:
-        name: python3-pip
-    
+        name:
+          - python3-pip
+          - libguestfs-tools
+        state: latest
+
     - name: Install proxmoxer
       pip:
         name: proxmoxer
@@ -12,6 +15,9 @@
       get_url:
         url: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
         dest: /opt/jammy-server-cloudimg-amd64.img
+    
+    - name: 
+      shell: virt-customize --install qemu-guest-agent -a /opt/jammy-server-cloudimg-amd64.img
 
     - name:  Create empty VM using Cloud-Init
       community.general.proxmox_kvm:
