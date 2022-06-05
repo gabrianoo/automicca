@@ -1,13 +1,49 @@
 #===============================================================================
+# Installing Providers
+#===============================================================================
+
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "telmate/proxmox"
+      version = "2.9.10"
+    }
+    pass = {
+      source  = "camptocamp/pass"
+      version = "2.0.0"
+    }
+  }
+}
+
+#===============================================================================
+# Pass Data
+#===============================================================================
+
+data "pass_password" "terraform_user" {
+  path = "terraform/user"
+}
+
+data "pass_password" "terraform_pass" {
+  path = "terraform/password"
+}
+
+data "pass_password" "ci_user" {
+  path = "ci/user"
+}
+
+data "pass_password" "ci_pass" {
+  path = "ci/password"
+}
+
+#===============================================================================
 # Proxmox Provider
 #===============================================================================
 
 provider "proxmox" {
   pm_api_url      = var.proxmox_url
-  pm_user         = var.proxmox_user
-  pm_password     = var.proxmox_password
+  pm_user         = var.proxmox_user != null ? var.proxmox_user : data.pass_password.terraform_user.password
+  pm_password     = var.proxmox_password != null ? var.proxmox_password : data.pass_password.terraform_pass.password
   pm_tls_insecure = var.proxmox_unverified_ssl
-  pm_otp          = var.proxmox_otp
 }
 
 #===============================================================================
@@ -193,9 +229,12 @@ resource "local_file" "keepalived_slave" {
 
 # Extra args for ansible playbooks #
 locals {
+  ssh_user = var.vm_ssh_user != null ? var.vm_ssh_user : data.pass_password.ci_user.password
+  ssh_password = var.vm_ssh_user_password != null ? var.vm_ssh_user_password : data.pass_password.ci_pass.password
+
   extra_args = {
     ubuntu = "-T 300"
-    debian = "-T 300 -e 'ansible_become_method=su'"
+    debian = "-T 300"
     centos = "-T 300"
     rhel   = "-T 300"
   }
@@ -232,12 +271,7 @@ resource "null_resource" "haproxy_install" {
   count = var.action == "create" ? 1 : 0
 
   provisioner "local-exec" {
-    command = "cd ../haproxy && ansible-playbook -i ../config/hosts.ini -b -u ${var.vm_ssh_user} -e \"ansible_ssh_pass=$VM_PASSWORD ansible_become_pass=$VM_PRIVILEGE_PASSWORD\" ${local.extra_args[var.vm_distro]} -v haproxy.yml"
-
-    environment = {
-      VM_PASSWORD           = var.vm_ssh_user_password
-      VM_PRIVILEGE_PASSWORD = var.vm_ssh_user_password
-    }
+    command = "cd ../haproxy && ansible-playbook -i ../kubernetes/config/hosts.ini -b -u ${local.ssh_user} -e \"ansible_ssh_pass=${local.ssh_password} ansible_become_pass=${local.ssh_password}\" ${local.extra_args[var.vm_distro]} -v haproxy.yml"
   }
 
   depends_on = [
@@ -252,12 +286,7 @@ resource "null_resource" "kubespray_create" {
   count = var.action == "create" ? 1 : 0
 
   provisioner "local-exec" {
-    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${var.vm_ssh_user} -e \"ansible_ssh_pass=$VM_PASSWORD ansible_become_pass=$VM_PRIVILEGE_PASSWORD kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v cluster.yml"
-
-    environment = {
-      VM_PASSWORD           = var.vm_ssh_user_password
-      VM_PRIVILEGE_PASSWORD = var.vm_ssh_user_password
-    }
+    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${local.ssh_user} -e \"ansible_ssh_pass=${local.ssh_password} ansible_become_pass=${local.ssh_password} kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v cluster.yml"
   }
 
   depends_on = [
@@ -277,12 +306,7 @@ resource "null_resource" "kubespray_add" {
   count = var.action == "add_worker" ? 1 : 0
 
   provisioner "local-exec" {
-    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${var.vm_ssh_user} -e \"ansible_ssh_pass=$VM_PASSWORD ansible_become_pass=$VM_PRIVILEGE_PASSWORD kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v scale.yml"
-
-    environment = {
-      VM_PASSWORD           = var.vm_ssh_user_password
-      VM_PRIVILEGE_PASSWORD = var.vm_ssh_user_password
-    }
+    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${local.ssh_user} -e \"ansible_ssh_pass=${local.ssh_password} ansible_become_pass=${local.ssh_password} kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v scale.yml"
   }
 
   depends_on = [
@@ -310,12 +334,7 @@ resource "null_resource" "kubespray_upgrade" {
   }
 
   provisioner "local-exec" {
-    command = "cd kubespray && ansible-playbook -i ../../config/hosts.ini -b -u ${var.vm_ssh_user} -e \"ansible_ssh_pass=$VM_PASSWORD ansible_become_pass=$VM_PRIVILEGE_PASSWORD kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v upgrade-cluster.yml"
-
-    environment = {
-      VM_PASSWORD           = var.vm_ssh_user_password
-      VM_PRIVILEGE_PASSWORD = var.vm_ssh_user_password
-    }
+    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${local.ssh_user} -e \"ansible_ssh_pass=${local.ssh_password} ansible_become_pass=${local.ssh_password} kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v upgrade-cluster.yml"
   }
 
   depends_on = [
@@ -333,12 +352,7 @@ resource "null_resource" "kubespray_upgrade" {
 # Create the local admin.conf kubectl configuration file #
 resource "null_resource" "kubectl_configuration" {
   provisioner "local-exec" {
-    command = "ansible -i ${var.vm_master_ips[0]}, -b -u ${var.vm_ssh_user} -e \"ansible_ssh_pass=$VM_PASSWORD ansible_become_pass=$VM_PRIVILEGE_PASSWORD\" ${local.extra_args[var.vm_distro]} -m fetch -a 'src=/etc/kubernetes/admin.conf dest=config/admin.conf flat=yes' all"
-
-    environment = {
-      VM_PASSWORD           = var.vm_ssh_user_password
-      VM_PRIVILEGE_PASSWORD = var.vm_ssh_user_password
-    }
+    command = "ansible -i ${var.vm_master_ips[0]}, -b -u ${local.ssh_user} -e \"ansible_ssh_pass=${local.ssh_password} ansible_become_pass=${local.ssh_password}\" ${local.extra_args[var.vm_distro]} -m fetch -a 'src=/etc/kubernetes/admin.conf dest=config/admin.conf flat=yes' all"
   }
 
   provisioner "local-exec" {
@@ -365,10 +379,6 @@ resource "proxmox_vm_qemu" "master" {
   clone = var.vm_template
   agent = 1
 
-  ssh_user   = var.vm_ssh_user
-  ciuser     = var.vm_ssh_user
-  cipassword = var.vm_ssh_user_password
-
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
   cores      = var.vm_master_cores
@@ -378,17 +388,13 @@ resource "proxmox_vm_qemu" "master" {
   full_clone = var.vm_full_clone
 
   network {
-    id     = 0
     model  = "virtio"
     bridge = var.vm_network_bridge
   }
 
   disk {
-    id           = 0
-    iothread     = true
     type         = var.vm_disk_type
     size         = var.vm_master_size
-    storage_type = var.vm_storage_type
     storage      = var.vm_storage
   }
 
@@ -410,9 +416,8 @@ resource "proxmox_vm_qemu" "worker" {
   clone = var.vm_template
   agent = 1
 
-  ssh_user   = var.vm_ssh_user
-  ciuser     = var.vm_ssh_user
-  cipassword = var.vm_ssh_user_password
+  ciuser     = var.vm_ssh_user != null ? var.vm_ssh_user : data.pass_password.ci_user.password
+  cipassword = var.vm_ssh_user_password != null ? var.vm_ssh_user_password : data.pass_password.ci_pass.password
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
@@ -423,17 +428,13 @@ resource "proxmox_vm_qemu" "worker" {
   full_clone = var.vm_full_clone
 
   network {
-    id     = 0
     model  = "virtio"
     bridge = var.vm_network_bridge
   }
 
   disk {
-    id           = 0
-    iothread     = true
     type         = var.vm_disk_type
     size         = var.vm_worker_size
-    storage_type = var.vm_storage_type
     storage      = var.vm_storage
   }
 
@@ -445,14 +446,7 @@ resource "proxmox_vm_qemu" "worker" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${self.ssh_user} -e \"ansible_ssh_pass=$VM_PASSWORD ansible_become_pass=$VM_PRIVILEGE_PASSWORD node=$VM_NAME delete_nodes_confirmation=yes\" -v remove-node.yml"
-
-    environment = {
-      VM_PASSWORD           = self.cipassword
-      VM_PRIVILEGE_PASSWORD = self.cipassword
-      VM_NAME               = self.name
-    }
-
+    command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${self.ciuser} -e \"ansible_ssh_pass=${self.cipassword} ansible_become_pass=${self.cipassword} node=$VM_NAME delete_nodes_confirmation=yes\" -v remove-node.yml"
     on_failure = continue
   }
 
@@ -478,9 +472,9 @@ resource "proxmox_vm_qemu" "haproxy" {
   clone		= var.vm_template
   agent		= 1
 
-  ssh_user   = var.vm_ssh_user
-  ciuser     = var.vm_ssh_user
-  cipassword = var.vm_ssh_user_password
+  ssh_user   = local.ssh_user
+  ciuser     = local.ssh_user
+  cipassword = local.ssh_password
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
@@ -491,17 +485,13 @@ resource "proxmox_vm_qemu" "haproxy" {
   full_clone = var.vm_full_clone
 
   network {
-    id     = 0
     model  = "virtio"
     bridge = var.vm_network_bridge
   }
 
   disk {
-    id           = 0
-    iothread     = true
     type         = var.vm_disk_type
     size         = var.vm_haproxy_size
-    storage_type = var.vm_storage_type
     storage      = var.vm_storage
   }
 

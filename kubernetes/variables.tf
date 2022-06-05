@@ -10,12 +10,9 @@ variable "proxmox_user" {
   description = "Proxmox user name"
 }
 
-variable "proxmox_otp" {
-  description = "Proxmox OTP"
-}
-
 variable "proxmox_password" {
   description = "Proxmox password"
+  default = null
 }
 
 variable "proxmox_unverified_ssl" {
@@ -43,11 +40,13 @@ variable "worker" {
 }
 
 variable "vm_user" {
-  description = "SSH user for the Proxmox virtual machines"
+  description = "SSH user for the Proxmox virtual machines (CI - Cloud Init)"
+  default     = null
 }
 
 variable "vm_password" {
-  description = "SSH password for the Proxmox virtual machines"
+  description = "SSH password for the Proxmox virtual machines (CI - Cloud Init)"
+  default     = null
 }
 
 variable "vm_numa" {
@@ -139,10 +138,12 @@ variable "vm_dns" {
 
 variable "vm_ssh_user" {
   description = "User used for ssh connection"
+  default = null
 }
 
 variable "vm_ssh_user_password" {
   description = "User password"
+  default = null
 }
 
 variable "vm_sshkeys" {

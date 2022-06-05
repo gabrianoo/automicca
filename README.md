@@ -5,7 +5,6 @@ This repository is a build-up (a fork) on top of [terraform-proxmox-kubespray](h
 ---
 # Getting started
 
-
 The goal of this repository is to bootstrap the whole infrastructure, automate all the repeated steps, and make the infrastructure work a breath.
 In this repository, we mainly used two technologies, Terraform and Ansible.
 
@@ -23,8 +22,6 @@ What is Terraform? [read this](https://www.terraform.io/intro).
 | Git         | 1.8.2.3         |
 | Ansible     | v2.6            |
 | Terraform   | v0.12           |
-| Jinja       | 2.9.6           |
-<!-- | Python netaddr | !!           | -->
 
 ## Considtations
 
@@ -106,8 +103,9 @@ Also replace `{{ lookup('passwordstore', 'pve/user') }}` and `{{ lookup('passwor
 
 This playbook aims to;
 1. Install pip for python 3,
-1. Install proxmoxer,
+1. Install proxmoxer and libguestfs-tools (to install packages in our cloud init image),
 1. Download ubuntu 22.04 Jammy cloud init image,
+1. Install `qemu-guest-agent` inside the new cloud init image,
 1. Create an empty VM using Cloud-Init,
 1. Import and attach Cloud-Init disk,
 1. Convert VM to a template. 
@@ -132,6 +130,49 @@ This playbook aims to;
 
 ```bash
 ansible-playbook proxmox/terraform.yaml -i hosts.yaml
+```
+
+## Kubernetes
+
+### Assumptions and Configurations
+
+Under each category we will share our assumption and the variable name to change it if needed. For a complete list of supported variables please check `kubernetes/variables.tf` and for changing the configurations that we already used ot assumed please check `kubernetes/terraform.tfvars`.
+
+#### Networking
+
+We have the assumption that your network is `192.168.1.0/24`, and we will give the machines (physical or virtual) IPs within this network. We also assumed that we have a search domain `gability.com`, your gateways IP address is `192.168.1.1`, and you have a DNS server at `192.168.1.2`. Below are the variables you need to change in `terraform.tfvars` to adapt your configurations.
+
+| Variable Name     | Our assumption |
+| ----------------- | -------------- |
+| `proxmox_url`     | The Proxmox API url, give the machine IP is `192.168.1.10` the URL should be `https://192.168.1.10:8006/api2/json`. |
+| `vm_searchdomain` | If you have a local search domain inside your network please add it. |
+| `vm_gateway`      | Your nework gateways. In home networks it is usually the router IP address. So, for `192.168.1.0/24` it is usually `192.168.1.1` |
+| `vm_dns`          | We have the assumption that we have a seperate DNS server (ex. a PiHole on `192.168.1.2`. But given the assumption it can be your router IP address `192.168.1.1` or even google dns `8.8.8.8`)|
+
+#### Proxmox
+
+We also have for Proxmox a set of assumptions that you need to modify according to your setup.
+
+| Variable Name     | Our assumption |
+| ----------------- | -------------- |
+| `proxmox_user`    | The Proxmox user responsible for manging the infrastructure. If you followed the Ansible automated Proxmox setup we used `terraform@pve`. |
+| `proxmox_node`    | The Proxmox node name used while installing Proxmox. In our case we named it `adam` |
+| `vm_storage`      | |
+| `vm_sshkeys`      | I have here my GitHub key. Please change it or I will have access to this machine :-D |
+| `vm_template`     | The Proxmox template name. If you followed the Ansible automated Proxmox template setup we created `ubuntu-cloud-22.04`. |
+
+
+#### Versions
+
+The latest setup I tested personally was Kubernetes `v1.23.7` with kuberspray `v2.19.0` on `flannel` network plugin.
+
+### Installing
+
+There is not much to do here except preparing a cup of coffee and wait for the bootstrapping of the cluster to finish.
+
+```bash
+terraform plan
+terraform apply
 ```
 
 ---
