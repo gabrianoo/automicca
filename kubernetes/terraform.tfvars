@@ -3,7 +3,7 @@
 #===============================================================================
 
 # Proxmox API url
-proxmox_url = "https://192.168.1.10:8006/api2/json"
+proxmox_url = "https://adam.pve.gability.com:8006/api2/json"
 
 # Proxmox username used to deploy the infrastructure #
 proxmox_user = "terraform@pve"
@@ -68,10 +68,11 @@ vm_full_clone = "true"
 #===============================================================================
 
 # The number of Thread VM will have, vCPUs = Socket * Cores
-vm_master_cores = "1"
+vm_master_cores = "2"
 
 # The amount of RAM allocated to the master virtual machines #
-vm_master_ram = "3072"
+vm_master_max_ram = "6144"
+vm_master_min_ram = "2048"
 
 # The size disk in GB
 vm_master_size = "32G"
@@ -88,19 +89,22 @@ vm_master_ips = {
 #===============================================================================
 
 # The number of Thread VM will have, vCPUs = Socket * Cores
-vm_worker_cores = "1"
+vm_worker_cores = "2"
 
 # The amount of RAM allocated to the worker virtual machines #
-vm_worker_ram = "4096"
+vm_worker_max_ram = "6144"
+vm_worker_min_ram = "3072"
 
 # The size disk in GB
-vm_worker_size = "32G"
+vm_worker_size = "64G"
 
 # The IP addresses of the master virtual machines. You need to define 1 IP or more for the workers #
 vm_worker_ips = {
   "0" = "192.168.1.106"
   "1" = "192.168.1.107"
   "2" = "192.168.1.108"
+  "3" = "192.168.1.109"
+  "4" = "192.168.1.110"
 }
 
 #===============================================================================
@@ -111,7 +115,8 @@ vm_worker_ips = {
 vm_haproxy_cores = "1"
 
 # The amount of RAM allocated to the load balancer virtual machine #
-vm_haproxy_ram = "2048"
+vm_haproxy_max_ram = "2048"
+vm_haproxy_min_ram = "1536"
 
 # The size disk in GB
 vm_haproxy_size = "32G"
@@ -133,10 +138,10 @@ vm_haproxy_ips = {
 k8s_kubespray_url = "https://github.com/kubernetes-sigs/kubespray.git"
 
 # The version of Kubespray that will be used to deploy Kubernetes #
-k8s_kubespray_version = "v2.19.0"
+k8s_kubespray_version = "master"
 
 # The Kubernetes version that will be deployed #
-k8s_version = "v1.23.7"
+k8s_version = "v1.27.4"
 
 # The overlay network plugin used by the Kubernetes cluster #
 k8s_network_plugin = "flannel"

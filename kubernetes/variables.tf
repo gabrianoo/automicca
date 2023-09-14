@@ -93,7 +93,7 @@ variable "k8s_kubespray_url" {
 
 variable "k8s_kubespray_version" {
   description = "Kubespray version"
-  default     = "2.13.0"
+  default     = "2.22.1"
 }
 
 variable "k8s_version" {
@@ -169,8 +169,12 @@ variable "vm_master_cores" {
   description = "Number of CPU Thread (vCPUs = Socket * cores) for the Kubernetes master virtual machines"
 }
 
-variable "vm_master_ram" {
-  description = "Amount of RAM for the Kubernetes master virtual machines (example: 2048)"
+variable "vm_master_max_ram" {
+  description = "The max amount of RAM for the Kubernetes master virtual machine (example: 1024)"
+}
+
+variable "vm_master_min_ram" {
+  description = "The min amount of RAM for the Kubernetes master virtual machine (example: 1024), if this value is smaller than vm_haproxy_max_ram the ballon feature will be enabled."
 }
 
 variable "vm_master_size" {
@@ -181,8 +185,12 @@ variable "vm_worker_cores" {
   description = "Number of CPU Thread (vCPUs = Socket * cores) for the Kubernetes worker virtual machines"
 }
 
-variable "vm_worker_ram" {
-  description = "Amount of RAM for the Kubernetes worker virtual machines (example: 2048)"
+variable "vm_worker_max_ram" {
+  description = "The max amount of RAM for the Kubernetes worker virtual machine (example: 1024)"
+}
+
+variable "vm_worker_min_ram" {
+  description = "The min amount of RAM for the Kubernetes worker virtual machine (example: 1024), if this value is smaller than vm_haproxy_max_ram the ballon feature will be enabled."
 }
 
 variable "vm_worker_size" {
@@ -193,8 +201,12 @@ variable "vm_haproxy_cores" {
   description = "Number of CPU Thread (vCPUs = Socket * cores) for the haproxy virtual machines"
 }
 
-variable "vm_haproxy_ram" {
-  description = "Amount of RAM for the HAProxy virtual machine (example: 1024)"
+variable "vm_haproxy_max_ram" {
+  description = "The max amount of RAM for the HAProxy virtual machine (example: 1024)"
+}
+
+variable "vm_haproxy_min_ram" {
+  description = "The min amount of RAM for the HAProxy virtual machine (example: 1024), if this value is smaller than vm_haproxy_max_ram the ballon feature will be enabled."
 }
 
 variable "vm_haproxy_size" {
@@ -203,6 +215,11 @@ variable "vm_haproxy_size" {
 
 variable "vm_name_prefix" {
   description = "Prefix for the name of the virtual machines and the hostname of the Kubernetes nodes"
+}
+
+variable "vm_tags" {
+  description = "Prefix for the tags of the virtual machines of the Kubernetes nodes"
+  default = "k8s"
 }
 
 #================================================================================

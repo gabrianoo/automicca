@@ -6,7 +6,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "2.9.10"
+      version = "2.9.11"
     }
     pass = {
       source  = "camptocamp/pass"
@@ -376,20 +376,25 @@ resource "proxmox_vm_qemu" "master" {
   name        = "${var.vm_name_prefix}-master-${count.index}"
   target_node = var.proxmox_node
 
-  clone = var.vm_template
-  agent = 1
+  clone      = var.vm_template
+  agent      = 1
+  tags       = var.vm_tags
+
+  ciuser     = local.ssh_user
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
   cores      = var.vm_master_cores
   vcpus      = var.vm_sockets * var.vm_master_cores
   cpu        = "host"
-  memory     = var.vm_master_ram
+  memory     = var.vm_master_max_ram
+  balloon    = var.vm_master_min_ram
   full_clone = var.vm_full_clone
+  onboot     = true
 
   network {
-    model  = "virtio"
-    bridge = var.vm_network_bridge
+    model    = "virtio"
+    bridge   = var.vm_network_bridge
   }
 
   disk {
@@ -413,8 +418,9 @@ resource "proxmox_vm_qemu" "worker" {
   name        = "${var.vm_name_prefix}-worker-${count.index}"
   target_node = var.proxmox_node
 
-  clone = var.vm_template
-  agent = 1
+  clone       = var.vm_template
+  agent       = 1
+  tags        = var.vm_tags
 
   ciuser     = var.vm_ssh_user != null ? var.vm_ssh_user : data.pass_password.ci_user.password
   cipassword = var.vm_ssh_user_password != null ? var.vm_ssh_user_password : data.pass_password.ci_pass.password
@@ -424,8 +430,10 @@ resource "proxmox_vm_qemu" "worker" {
   cores      = var.vm_worker_cores
   vcpus      = var.vm_sockets * var.vm_worker_cores
   cpu        = "host"
-  memory     = var.vm_worker_ram
+  memory     = var.vm_worker_max_ram
+  balloon    = var.vm_worker_min_ram
   full_clone = var.vm_full_clone
+  onboot     = true
 
   network {
     model  = "virtio"
@@ -469,20 +477,23 @@ resource "proxmox_vm_qemu" "haproxy" {
   name        = "${var.vm_name_prefix}-haproxy-${count.index}"
   target_node = var.proxmox_node
 
-  clone		= var.vm_template
-  agent		= 1
+  clone		    = var.vm_template
+  agent		    = 1
+  tags        = var.vm_tags
 
-  ssh_user   = local.ssh_user
-  ciuser     = local.ssh_user
-  cipassword = local.ssh_password
+  ssh_user    = local.ssh_user
+  ciuser      = local.ssh_user
+  cipassword  = local.ssh_password
 
-  os_type    = "cloud-init"
-  sockets    = var.vm_sockets
-  cores      = var.vm_haproxy_cores
-  vcpus      = var.vm_sockets * var.vm_haproxy_cores
-  cpu        = "host"
-  memory     = var.vm_haproxy_ram
-  full_clone = var.vm_full_clone
+  os_type     = "cloud-init"
+  sockets     = var.vm_sockets
+  cores       = var.vm_haproxy_cores
+  vcpus       = var.vm_sockets * var.vm_haproxy_cores
+  cpu         = "host"
+  memory      = var.vm_haproxy_max_ram
+  balloon     = var.vm_haproxy_min_ram
+  full_clone  = var.vm_full_clone
+  onboot      = true
 
   network {
     model  = "virtio"
