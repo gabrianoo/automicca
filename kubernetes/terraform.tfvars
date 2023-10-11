@@ -141,7 +141,7 @@ k8s_kubespray_url = "https://github.com/kubernetes-sigs/kubespray.git"
 k8s_kubespray_version = "master"
 
 # The Kubernetes version that will be deployed #
-k8s_version = "v1.27.4"
+k8s_version = "v1.28.2"
 
 # The overlay network plugin used by the Kubernetes cluster #
 k8s_network_plugin = "flannel"
