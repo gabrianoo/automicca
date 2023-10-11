@@ -311,7 +311,6 @@ resource "null_resource" "kubespray_add" {
 
   depends_on = [
     local_file.kubespray_hosts,
-    null_resource.kubespray_download,
     local_file.kubespray_all,
     local_file.kubespray_k8s_cluster,
     null_resource.haproxy_install,
@@ -330,16 +329,11 @@ resource "null_resource" "kubespray_upgrade" {
   }
 
   provisioner "local-exec" {
-    command = "rm -rf kubespray && git clone --branch ${var.k8s_kubespray_version} ${var.k8s_kubespray_url}"
-  }
-
-  provisioner "local-exec" {
     command = "cd kubespray && ansible-playbook -i ../config/hosts.ini -b -u ${local.ssh_user} -e \"ansible_ssh_pass=${local.ssh_password} ansible_become_pass=${local.ssh_password} kube_version=${var.k8s_version}\" ${local.extra_args[var.vm_distro]} -v upgrade-cluster.yml"
   }
 
   depends_on = [
     local_file.kubespray_hosts,
-    null_resource.kubespray_download,
     local_file.kubespray_all,
     local_file.kubespray_k8s_cluster,
     null_resource.haproxy_install,
