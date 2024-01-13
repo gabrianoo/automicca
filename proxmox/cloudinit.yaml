@@ -1,30 +1,44 @@
 - hosts: proxmox
+  vars:
+    ansible_python_interpreter: "/root/venv/proxmox/bin/python"
   tasks:
+    - name: Include vars from a file
+      include_vars:
+        file: varsfile.yml
     - name: Install pip for python 3
       apt:
         name:
           - python3-pip
           - libguestfs-tools
+          - python3-venv
         state: latest
 
-    - name: Install proxmoxer
-      pip:
-        name: proxmoxer
+    - name: Create a virtual environment named 'proxmox'
+      command: python3 -m venv /root/venv/proxmox
+      args:
+        creates: /root/venv/proxmox
+
+    - name: Activate virtual environment and run script
+      shell: |
+        source /root/venv/proxmox/bin/activate
+        pip3 install proxmoxer requests
+      args:
+        executable: /bin/bash
 
     - name: Download ubuntu 22.04 Jammy cloud init image
       get_url:
         url: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
         dest: /opt/jammy-server-cloudimg-amd64.img
-    
-    - name: 
+
+    - name:
       shell: virt-customize --install qemu-guest-agent -a /opt/jammy-server-cloudimg-amd64.img
 
-    - name:  Create empty VM using Cloud-Init
+    - name: Create empty VM using Cloud-Init
       community.general.proxmox_kvm:
-        node: adam
+        node: "{{ node_name }}"
         api_user: "{{ lookup('passwordstore', 'pve/user') }}"
         api_password: "{{ lookup('passwordstore', 'pve/password') }}"
-        api_host: adam.pve.gability.com
+        api_host: "{{ node_host }}"
         ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
         cipassword: "{{ lookup('passwordstore', 'ci/password') }}"
         name: ubuntu-cloud-22.04
@@ -32,41 +46,41 @@
         cores: 2
         memory: 2048
         net:
-          net0: 'virtio,bridge=vmbr0'
+          net0: "virtio,bridge=vmbr0"
         scsihw: virtio-scsi-pci
         scsi:
-          scsi0: 'fast0:1'
+          scsi0: "{{disk_name}}:1"
         ide:
-          ide2: 'fast0:cloudinit'
+          ide2: "{{disk_name}}:cloudinit"
         bootdisk: scsi0
         boot: c
         vga: serial0
         ipconfig:
-          ipconfig0: 'ip=dhcp'
+          ipconfig0: "ip=dhcp"
         proxmox_default_behavior: compatibility
 
     - name: Import init disk
-      shell: 'qm importdisk 8000 /opt/jammy-server-cloudimg-amd64.img fast0'
+      shell: "qm importdisk 8000 /opt/jammy-server-cloudimg-amd64.img {{disk_name}}"
       args:
-        creates: '/dev/mapper/fast0-vm--8000--disk--1'
+        creates: "/dev/mapper/{{disk_name}}-vm--8000--disk--1"
 
     - name: Attach base image disk
       ansible.builtin.lineinfile:
         path: /etc/pve/local/qemu-server/8000.conf
-        regexp: '^scsi0:.*'
-        line: 'scsi0: fast0:vm-8000-disk-1'
+        regexp: "^scsi0:.*"
+        line: "scsi0: {{disk_name}}:vm-8000-disk-1"
 
     - name: Convert VM to template
       community.general.proxmox_kvm:
-        node: adam
+        node: "{{ node_name }}"
         api_user: "{{ lookup('passwordstore', 'pve/user') }}"
         api_password: "{{ lookup('passwordstore', 'pve/password') }}"
-        api_host: adam.pve.gability.com
+        api_host: "{{ node_host }}"
         vmid: 8000
         name: ubuntu-cloud-22.04
         scsihw: virtio-scsi-pci
         ide:
-          ide2: 'fast0:cloudinit'
+          ide2: "{{disk_name}}:cloudinit"
         bootdisk: scsi0
         ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
         cipassword: "{{ lookup('passwordstore', 'ci/password') }}"

@@ -37,18 +37,41 @@ What is Terraform? [read this](https://www.terraform.io/intro).
 To execute the playbooks in this repository, you must create your inventory file. I made an example one in this repository, depending on the values we are using in this repository. Please change the values to match your custom values. Along the way, I will highlight what to change to match your environment.
 
 1. The inventory supports two formats, `INI` and `YAML`. Below is an example of the inventory file in `YAML` format. I added a complete example in this repository with all the hosts we will use in this project.
+1. Rename hosts file name
+    ```sh
+    mv example.hosts.yaml hosts.yaml    
+    ```
+1. Change hosts.yaml    
     ```yaml
     all:
       children:
         proxmox:
           hosts:
-            adam.pve.gability.com:
+            YOUR_HOST_NAME:
               ansible_user: root
     ```
-1. `adam.pve.gability.com:` replace this hostname with your Proxmox node hostname.
+1. `YOUR_HOST_NAME:` replace this hostname with your Proxmox node hostname.
 1. `ansible_user: root` this is the Proxmox default and only created user. Later we will create another user
 
+
+1. Rename variable file name
+    ```sh
+    mv example.varsfile.yml varsfile.yml
+    ```
+1. Change environment variable values
+
+    ```yml 
+      node_name: YOUR_PROXMOX_NODE_NAME
+      node_host: YOUR_PROXMOX_NODE_HOST_NAME
+      disk_name: YOUR_PROXMOX_STORAGE_NAME
+    ```
+1. `YOUR_PROXMOX_NODE_NAME:` replace this name with your Proxmox node name.
+1. `YOUR_PROXMOX_NODE_HOST_NAME` replace this host name with your Proxmox node host name, example `adam.gability.com` .
+1. `YOUR_PROXMOX_STORAGE_NAME` this is the Proxmox storage name that used for storing cloud init files.
+    
 ---
+
+
 
 # Bootstrapping
 

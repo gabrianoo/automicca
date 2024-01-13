@@ -6,3 +6,7 @@
 terraform.tfstate*
 kubernetes/kubespray/
 kubernetes/config/
+ansible
+proxmox/varsfile.yml
+desk
+hosts.yaml

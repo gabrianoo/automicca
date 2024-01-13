@@ -1,0 +1,3 @@
+node_name: sun
+node_host: sun.homelab
+disk_name: local-lvm

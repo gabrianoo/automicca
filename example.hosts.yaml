@@ -2,5 +2,5 @@ all:
   children:
     proxmox:
       hosts:
-        adam.pve.gability.com:
+        YOUR_PROXMOX_NODE_HOST_NAME:
           ansible_user: root
