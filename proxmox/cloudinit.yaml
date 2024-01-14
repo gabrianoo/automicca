@@ -63,6 +63,6 @@
           ide2: "{{disk_name}}:cloudinit"
         bootdisk: scsi0
         ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
-        cipassword: "{{ lookup('passwordstore', 'ci/password') }}"
+        cipassword: "{{ lookup('passwordstore', 'ci/password') }}"        
         template: yes
         update: yes
