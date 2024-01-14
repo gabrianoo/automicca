@@ -38,7 +38,6 @@
         vga: serial0
         ipconfig:
           ipconfig0: "ip=dhcp"
-        proxmox_default_behavior: compatibility
 
     - name: Import init disk
       shell: "qm importdisk 8000 /opt/jammy-server-cloudimg-amd64.img {{disk_name}}"
@@ -64,7 +63,6 @@
           ide2: "{{disk_name}}:cloudinit"
         bootdisk: scsi0
         ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
-        cipassword: "{{ lookup('passwordstore', 'ci/password') }}"
-        proxmox_default_behavior: compatibility
+        cipassword: "{{ lookup('passwordstore', 'ci/password') }}"        
         template: yes
         update: yes

@@ -158,7 +158,14 @@ ansible-playbook proxmox/terraform.yaml -i hosts.yaml
 ## Kubernetes
 
 ### Assumptions and Configurations
-
+1. Rename hosts file name
+    ```sh
+    mv example.terraform.tfvars terraform.tfvars    
+    ```
+1. `YOUR_PROXMOX_NODE_NAME:` replace this name with your Proxmox node name.
+1. `YOUR_PROXMOX_NODE_HOST_NAME` replace this host name with your Proxmox node host name, example `adam.gability.com` .
+1. `YOUR_PROXMOX_STORAGE_NAME` this is the Proxmox storage name that used for storing cloud init files.
+       
 Under each category we will share our assumption and the variable name to change it if needed. For a complete list of supported variables please check `kubernetes/variables.tf` and for changing the configurations that we already used ot assumed please check `kubernetes/terraform.tfvars`.
 
 #### Networking
@@ -194,6 +201,7 @@ The latest setup I tested personally was Kubernetes `v1.23.7` with kuberspray `v
 There is not much to do here except preparing a cup of coffee and wait for the bootstrapping of the cluster to finish.
 
 ```bash
+terraform init
 terraform plan
 terraform apply
 ```
