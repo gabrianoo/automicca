@@ -10,3 +10,4 @@ ansible
 proxmox/varsfile.yml
 desk
 hosts.yaml
+terraform.tfvars
