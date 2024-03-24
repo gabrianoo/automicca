@@ -93,12 +93,12 @@ variable "k8s_kubespray_url" {
 
 variable "k8s_kubespray_version" {
   description = "Kubespray version"
-  default     = "2.22.1"
+  default     = "2.23.1"
 }
 
 variable "k8s_version" {
   description = "Version of Kubernetes that will be deployed"
-  default     = "1.17.6"
+  default     = "1.28.4"
 }
 
 variable "vm_master_ips" {
