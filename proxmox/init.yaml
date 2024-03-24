@@ -7,7 +7,7 @@
 
     - name: Add PVE no subscription repository into sources list
       ansible.builtin.apt_repository:
-        repo: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
+        repo: deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription
         state: present
 
     - name: Upgrade all packages. Equivalent of "apt-get upgrade"
