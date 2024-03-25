@@ -75,7 +75,7 @@ vm_master_max_ram = "6144"
 vm_master_min_ram = "2048"
 
 # The size disk in GB
-vm_master_size = "32G"
+vm_master_size = 32
 
 # The IP addresses of the master virtual machines. You need to define 3 IPs for the masters #
 vm_master_ips = {
@@ -96,7 +96,7 @@ vm_worker_max_ram = "10240"
 vm_worker_min_ram = "3072"
 
 # The size disk in GB
-vm_worker_size = "64G"
+vm_worker_size = 64
 
 # The IP addresses of the master virtual machines. You need to define 1 IP or more for the workers #
 vm_worker_ips = {
@@ -119,7 +119,7 @@ vm_haproxy_max_ram = "2048"
 vm_haproxy_min_ram = "1536"
 
 # The size disk in GB
-vm_haproxy_size = "32G"
+vm_haproxy_size = 32
 
 # The IP address of the load balancer floating VIP #
 vm_haproxy_vip = "192.168.1.100"
