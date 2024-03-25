@@ -23,6 +23,16 @@ variable "proxmox_node" {
   description = "Proxmox node"
 }
 
+variable "proxmox_parallel_thread_count" {
+  description = "Proxmox parallel thread count"
+  default = 2
+}
+
+variable "proxmox_debug" {
+  description = "Proxmox enable debugging"
+  default = false
+}
+
 #================================================================================
 # Kubernetes infrastructure
 #================================================================================

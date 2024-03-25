@@ -12,7 +12,10 @@ resource "proxmox_vm_qemu" "master" {
   agent = 1
   tags  = var.vm_tags
 
-  ciuser = local.ssh_user
+  ssh_user                = local.ssh_user
+  ciuser                  = local.ssh_user
+  cipassword              = local.ssh_password
+  cloudinit_cdrom_storage = var.vm_storage
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets

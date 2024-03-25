@@ -12,9 +12,10 @@ resource "proxmox_vm_qemu" "haproxy" {
   agent = 1
   tags  = var.vm_tags
 
-  ssh_user   = local.ssh_user
-  ciuser     = local.ssh_user
-  cipassword = local.ssh_password
+  ssh_user                = local.ssh_user
+  ciuser                  = local.ssh_user
+  cipassword              = local.ssh_password
+  cloudinit_cdrom_storage = var.vm_storage
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
@@ -44,12 +45,6 @@ resource "proxmox_vm_qemu" "haproxy" {
       }
     }
   }
-
-  #  disk {
-  #    type         = var.vm_disk_type
-  #    size         = var.vm_haproxy_size
-  #    storage      = var.vm_storage
-  #  }
 
   ipconfig0    = "ip=${var.vm_haproxy_ips[count.index]}/${var.vm_netmask},gw=${var.vm_gateway}"
   searchdomain = var.vm_searchdomain

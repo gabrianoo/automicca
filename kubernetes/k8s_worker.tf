@@ -12,8 +12,10 @@ resource "proxmox_vm_qemu" "worker" {
   agent = 1
   tags  = var.vm_tags
 
-  ciuser     = var.vm_ssh_user != null ? var.vm_ssh_user : data.pass_password.ci_user.password
-  cipassword = var.vm_ssh_user_password != null ? var.vm_ssh_user_password : data.pass_password.ci_pass.password
+  ssh_user                = local.ssh_user
+  ciuser                  = local.ssh_user
+  cipassword              = local.ssh_password
+  cloudinit_cdrom_storage = var.vm_storage
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
