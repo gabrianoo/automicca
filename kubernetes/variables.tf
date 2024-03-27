@@ -12,7 +12,7 @@ variable "proxmox_user" {
 
 variable "proxmox_password" {
   description = "Proxmox password"
-  default = null
+  default     = null
 }
 
 variable "proxmox_unverified_ssl" {
@@ -25,12 +25,12 @@ variable "proxmox_node" {
 
 variable "proxmox_parallel_thread_count" {
   description = "Proxmox parallel thread count"
-  default = 2
+  default     = 2
 }
 
 variable "proxmox_debug" {
   description = "Proxmox enable debugging"
-  default = false
+  default     = false
 }
 
 #================================================================================
@@ -61,6 +61,7 @@ variable "vm_password" {
 
 variable "vm_numa" {
   description = "Multi socket cpu"
+  default     = false
 }
 
 variable "vm_sockets" {
@@ -148,12 +149,12 @@ variable "vm_dns" {
 
 variable "vm_ssh_user" {
   description = "User used for ssh connection"
-  default = null
+  default     = null
 }
 
 variable "vm_ssh_user_password" {
   description = "User password"
-  default = null
+  default     = null
 }
 
 variable "vm_sshkeys" {
@@ -229,7 +230,7 @@ variable "vm_name_prefix" {
 
 variable "vm_tags" {
   description = "Prefix for the tags of the virtual machines of the Kubernetes nodes"
-  default = "k8s"
+  default     = "k8s"
 }
 
 #================================================================================

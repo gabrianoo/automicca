@@ -21,6 +21,7 @@ resource "proxmox_vm_qemu" "worker" {
   cores      = var.vm_worker_cores
   vcpus      = var.vm_sockets * var.vm_worker_cores
   cpu        = "host"
+  numa       = var.vm_numa
   memory     = var.vm_worker_max_ram
   balloon    = var.vm_worker_min_ram
   full_clone = var.vm_full_clone

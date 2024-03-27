@@ -21,6 +21,7 @@ resource "proxmox_vm_qemu" "master" {
   cores      = var.vm_master_cores
   vcpus      = var.vm_sockets * var.vm_master_cores
   cpu        = "host"
+  numa       = var.vm_numa
   memory     = var.vm_master_max_ram
   balloon    = var.vm_master_min_ram
   full_clone = var.vm_full_clone

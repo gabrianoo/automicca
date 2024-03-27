@@ -21,6 +21,7 @@ resource "proxmox_vm_qemu" "haproxy" {
   cores      = var.vm_haproxy_cores
   vcpus      = var.vm_sockets * var.vm_haproxy_cores
   cpu        = "host"
+  numa       = var.vm_numa
   memory     = var.vm_haproxy_max_ram
   balloon    = var.vm_haproxy_min_ram
   full_clone = var.vm_full_clone
