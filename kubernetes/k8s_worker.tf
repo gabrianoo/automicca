@@ -4,7 +4,7 @@
 
 # Create the Kubernetes worker VMs #
 resource "proxmox_vm_qemu" "worker" {
-  count       = length(var.vm_worker_ips)
+  count = length(var.vm_worker_ips)
   name        = "${var.vm_name_prefix}-worker-${count.index}"
   target_node = var.proxmox_node
 
@@ -12,15 +12,14 @@ resource "proxmox_vm_qemu" "worker" {
   agent = 1
   tags  = var.vm_tags
 
-  ciuser                  = local.ssh_user
-  cipassword              = local.ssh_password
-  cloudinit_cdrom_storage = var.vm_storage
+  ciuser     = local.ssh_user
+  cipassword = local.ssh_password
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
   cores      = var.vm_worker_cores
   vcpus      = var.vm_sockets * var.vm_worker_cores
-  cpu        = "host"
+  cpu_type   = "host"
   numa       = var.vm_numa
   memory     = var.vm_worker_max_ram
   balloon    = var.vm_worker_min_ram
@@ -29,11 +28,24 @@ resource "proxmox_vm_qemu" "worker" {
   scsihw     = "virtio-scsi-pci"
 
   network {
+    id     = 0
     model  = "virtio"
     bridge = var.vm_network_bridge
   }
 
   disks {
+    ide {
+      ide2 {
+        cdrom {
+          passthrough = false
+        }
+      }
+      ide3 {
+        cloudinit {
+          storage = var.vm_storage
+        }
+      }
+    }
     scsi {
       scsi0 {
         disk {

@@ -4,7 +4,7 @@
 
 # Create the Kubernetes master VMs #
 resource "proxmox_vm_qemu" "master" {
-  count       = length(var.vm_master_ips)
+  count = length(var.vm_master_ips)
   name        = "${var.vm_name_prefix}-master-${count.index}"
   target_node = var.proxmox_node
 
@@ -12,15 +12,14 @@ resource "proxmox_vm_qemu" "master" {
   agent = 1
   tags  = var.vm_tags
 
-  ciuser                  = local.ssh_user
-  cipassword              = local.ssh_password
-  cloudinit_cdrom_storage = var.vm_storage
+  ciuser     = local.ssh_user
+  cipassword = local.ssh_password
 
   os_type    = "cloud-init"
   sockets    = var.vm_sockets
   cores      = var.vm_master_cores
   vcpus      = var.vm_sockets * var.vm_master_cores
-  cpu        = "host"
+  cpu_type   = "host"
   numa       = var.vm_numa
   memory     = var.vm_master_max_ram
   balloon    = var.vm_master_min_ram
@@ -29,11 +28,24 @@ resource "proxmox_vm_qemu" "master" {
   scsihw     = "virtio-scsi-pci"
 
   network {
+    id     = 0
     model  = "virtio"
     bridge = var.vm_network_bridge
   }
 
   disks {
+    ide {
+      ide2 {
+        cdrom {
+          passthrough = false
+        }
+      }
+      ide3 {
+        cloudinit {
+          storage = var.vm_storage
+        }
+      }
+    }
     scsi {
       scsi0 {
         disk {

@@ -25,7 +25,7 @@ variable "proxmox_node" {
 
 variable "proxmox_parallel_thread_count" {
   description = "Proxmox parallel thread count"
-  default     = 2
+  default     = 1
 }
 
 variable "proxmox_debug" {

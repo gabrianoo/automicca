@@ -19,9 +19,9 @@ What is Terraform? [read this](https://www.terraform.io/intro).
 
 | Application | Last tested version |
 |-------------|---------------------|
-| Git         | 2.39.3              |
-| Ansible     | v2.16.4             |
-| Terraform   | v1.7.0              |
+| Git         | 2.45.2              |
+| Ansible     | v2.17.0             |
+| Terraform   | v1.11.2             |
 
 ## Considerations
 
@@ -58,7 +58,7 @@ To execute the playbooks in this repository, you must create your inventory file
 5. `ansible_user: root` this is the Proxmox default and only created user. Later we will create another user
 6. Rename variable file name
     ```sh
-    mv example.varsfile.yml varsfile.yml
+    mv proxmox/example.varsfile.yml proxmox/varsfile.yml
     ```
 7. Change environment variable values
 
@@ -160,7 +160,7 @@ ansible-playbook proxmox/terraform.yaml -i hosts.yaml
 ### Assumptions and Configurations
 1. Rename hosts file name
     ```sh
-    mv example.terraform.tfvars terraform.tfvars    
+    mv kubernetes/example.terraform.tfvars kubernetes/terraform.tfvars    
     ```
 2. `YOUR_PROXMOX_NODE_NAME:` replace this name with your Proxmox node name.
 3. `YOUR_PROXMOX_NODE_HOST_NAME` replace this host name with your Proxmox node host name, example `adam.gability.com` .

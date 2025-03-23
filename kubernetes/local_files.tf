@@ -25,7 +25,7 @@ resource "local_file" "kubespray_hosts" {
     )}\n[kube-node]\n${join(
     "",
     data.template_file.kubespray_hosts_worker_list.*.rendered,
-  )}\n[k8s-cluster:children]\nkube-master\nkube-node"
+  )}\n[k8s_cluster:children]\nkube-master\nkube-node"
   filename = "config/hosts.ini"
 }
 
