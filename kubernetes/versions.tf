@@ -7,11 +7,11 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.1-rc6"
+      version = "3.0.2-rc03"
     }
     pass = {
       source  = "camptocamp/pass"
-      version = "2.0.0"
+      version = "2.1.1"
     }
   }
 }

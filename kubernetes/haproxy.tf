@@ -16,21 +16,28 @@ resource "proxmox_vm_qemu" "haproxy" {
   cipassword = local.ssh_password
 
   os_type    = "cloud-init"
-  sockets    = var.vm_sockets
-  cores      = var.vm_haproxy_cores
-  vcpus      = var.vm_sockets * var.vm_haproxy_cores
-  cpu_type   = "host"
-  numa       = var.vm_numa
   memory     = var.vm_haproxy_max_ram
   balloon    = var.vm_haproxy_min_ram
   full_clone = var.vm_full_clone
   onboot     = true
   scsihw     = "virtio-scsi-pci"
 
+  cpu {
+    type    = "host"
+    sockets = var.vm_sockets
+    cores   = var.vm_haproxy_cores
+    numa    = var.vm_numa
+  }
+
   network {
     id     = 0
     model  = "virtio"
     bridge = var.vm_network_bridge
+  }
+
+  serial {
+    id   = 0
+    type = "socket"
   }
 
   disks {

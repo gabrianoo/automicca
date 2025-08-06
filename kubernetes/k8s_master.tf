@@ -16,16 +16,23 @@ resource "proxmox_vm_qemu" "master" {
   cipassword = local.ssh_password
 
   os_type    = "cloud-init"
-  sockets    = var.vm_sockets
-  cores      = var.vm_master_cores
-  vcpus      = var.vm_sockets * var.vm_master_cores
-  cpu_type   = "host"
-  numa       = var.vm_numa
   memory     = var.vm_master_max_ram
   balloon    = var.vm_master_min_ram
   full_clone = var.vm_full_clone
   onboot     = true
   scsihw     = "virtio-scsi-pci"
+
+  cpu {
+    type    = "host"
+    sockets = var.vm_sockets
+    cores   = var.vm_master_cores
+    numa    = var.vm_numa
+  }
+
+  serial {
+    id   = 0
+    type = "socket"
+  }
 
   network {
     id     = 0
