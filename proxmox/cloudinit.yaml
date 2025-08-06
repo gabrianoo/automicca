@@ -6,13 +6,13 @@
       include_vars:
         file: varsfile.yml
 
-    - name: Download ubuntu 22.04 Jammy cloud init image
+    - name: Download ubuntu 24.04 Nammy cloud init image
       get_url:
-        url: https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
-        dest: /opt/jammy-server-cloudimg-amd64.img
+        url: https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+        dest: /opt/noble-server-cloudimg-amd64.img
 
     - name:
-      shell: virt-customize --install qemu-guest-agent -a /opt/jammy-server-cloudimg-amd64.img
+      shell: virt-customize --install qemu-guest-agent -a /opt/noble-server-cloudimg-amd64.img
 
     - name: Create empty VM using Cloud-Init
       community.general.proxmox_kvm:
@@ -22,7 +22,7 @@
         api_host: "{{ node_host }}"
         ciuser: "{{ lookup('passwordstore', 'ci/user') }}"
         cipassword: "{{ lookup('passwordstore', 'ci/password') }}"
-        name: ubuntu-cloud-22.04
+        name: ubuntu-cloud-24.04
         vmid: 8000
         cores: 2
         memory: 2048
@@ -40,7 +40,7 @@
           ipconfig0: "ip=dhcp"
 
     - name: Import init disk
-      shell: "qm importdisk 8000 /opt/jammy-server-cloudimg-amd64.img {{disk_name}}"
+      shell: "qm importdisk 8000 /opt/noble-server-cloudimg-amd64.img {{disk_name}}"
       args:
         creates: "/dev/mapper/{{disk_name}}-vm--8000--disk--1"
 
@@ -57,7 +57,7 @@
         api_password: "{{ lookup('passwordstore', 'pve/password') }}"
         api_host: "{{ node_host }}"
         vmid: 8000
-        name: ubuntu-cloud-22.04
+        name: ubuntu-cloud-24.04
         scsihw: virtio-scsi-pci
         ide:
           ide2: "{{disk_name}}:cloudinit"
