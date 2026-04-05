@@ -4,7 +4,7 @@
 
 # Create the HAProxy load balancer VM #
 resource "proxmox_vm_qemu" "haproxy" {
-  count = length(var.vm_haproxy_ips)
+  count       = length(var.vm_haproxy_ips)
   name        = "${var.vm_name_prefix}-haproxy-${count.index}"
   target_node = var.proxmox_node
 
@@ -15,12 +15,12 @@ resource "proxmox_vm_qemu" "haproxy" {
   ciuser     = local.ssh_user
   cipassword = local.ssh_password
 
-  os_type    = "cloud-init"
-  memory     = var.vm_haproxy_max_ram
-  balloon    = var.vm_haproxy_min_ram
-  full_clone = var.vm_full_clone
-  onboot     = true
-  scsihw     = "virtio-scsi-pci"
+  os_type            = "cloud-init"
+  memory             = var.vm_haproxy_max_ram
+  balloon            = var.vm_haproxy_min_ram
+  full_clone         = var.vm_full_clone
+  start_at_node_boot = true
+  scsihw             = "virtio-scsi-pci"
 
   cpu {
     type    = "host"

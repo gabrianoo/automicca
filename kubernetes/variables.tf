@@ -104,7 +104,7 @@ variable "k8s_kubespray_url" {
 
 variable "k8s_kubespray_version" {
   description = "Kubespray version"
-  default     = "2.23.1"
+  default     = "2.30.0"
 }
 
 variable "k8s_version" {
